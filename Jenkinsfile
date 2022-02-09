@@ -30,11 +30,11 @@ pipeline {
 			steps{
 				sshagent(['jenkins-ssh-qa'])
 				{
-					sh 'scp -r -o StrictHostKeyChecking=no taxiapppod-deployment.yaml centos@10.0.100.51:/var/tmp/'
+					sh 'scp -r -o StrictHostKeyChecking=no taxiapppod-deployment.yaml root@10.0.100.51:/var/tmp/'
 					
 					script{
 						try{
-							sh 'ssh centos@10.0.100.51 kubectl apply -f /var/tmp/taxiapppod-deployment.yaml'
+							sh 'ssh root@10.0.100.51 kubectl apply -f /var/tmp/taxiapppod-deployment.yaml'
 
 							}catch(error)
 							{
