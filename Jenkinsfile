@@ -25,6 +25,25 @@ pipeline {
                 sh 'docker push sreemanthena/taxiappgrabber:$BUILD_NUMBER'
             }
         }
+        stage('Create POD on K8s')
+		{
+			steps{
+				sshagent(['kubernetes-host-ssh-key'])
+				{
+					sh 'scp -r -o StrictHostKeyChecking=no taxiapppod-deployment.yaml root@10.0.100.51:/var/tmp/'
+					
+					script{
+						try{
+							sh 'ssh root@10.0.100.51 kubectl apply -f /var/tmp/taxiapppod-deployment.yaml'
+
+							}catch(error)
+							{
+
+							}
+					}
+				}
+			}
+		}
 }
 post {
         always {
