@@ -12,7 +12,7 @@ pipeline {
 
         stage('Build docker image') {
             steps {  
-                sh 'docker build -t valaxytech/taxigrabber:$BUILD_NUMBER .'
+                sh 'docker build -t sreemanthena/taxiappgrabber:$BUILD_NUMBER .'
             }
         }
         stage('login to dockerhub') {
@@ -22,7 +22,7 @@ pipeline {
         }
         stage('push image') {
             steps{
-                sh 'docker push valaxytech/taxigrabber:$BUILD_NUMBER'
+                sh 'docker push sreemanthena/taxiappgrabber:$BUILD_NUMBER'
             }
         }
 }
