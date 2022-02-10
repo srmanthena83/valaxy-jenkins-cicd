@@ -1,61 +1,53 @@
-pipeline{
+pipeline {
+    agent any 
+    environment {
+    DOCKERHUB_CREDENTIALS = credentials('sreemanthena-dockerhub')
+    }
+    stages { 
+        stage('SCM Checkout') {
+            steps{
+            git 'https://github.com/srmanthena83/valaxy-jenkins-cicd.git'
+            }
+        }
 
-	agent any
-
-	environment {
-		DOCKERHUB_CREDENTIALS=credentials('dockerhub-cred-raja')
-	}
-
-	stages {
-
-		stage('Build') {
-
-			steps {
-				sh 'docker build -t bharathirajatut/erp:1.0 .'
-			}
-		}
-
-		stage('Login') {
-
-			steps {
-				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-			}
-		}
-
-
-		stage('Push') {
-
-			steps {
-				sh 'docker push bharathirajatut/erp:1.0'
-			}
-		}
-
-
-		stage('Deploy to K8s')
+        stage('Build docker image') {
+            steps {  
+                sh 'docker build -t sreemanthena/taxiappgrabber:$BUILD_NUMBER .'
+            }
+        }
+        stage('login to dockerhub') {
+            steps{
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+            }
+        }
+        stage('push image') {
+            steps{
+                sh 'docker push sreemanthena/taxiappgrabber:$BUILD_NUMBER'
+            }
+        }
+        stage('Create POD on K8s')
 		{
 			steps{
 				sshagent(['k8s'])
 				{
-					sh 'scp -r -o StrictHostKeyChecking=no taxiapppod-deployment.yaml centos@10.0.100.51:/home/centos'
+					sh 'scp -r -o StrictHostKeyChecking=no taxiapppod-deployment.yaml centos@10.0.100.51:/var/tmp/'
 					
 					script{
 						try{
-							sh 'ssh centos@10.0.100.51: kubectl apply -f . '
+							sh 'ssh centos@10.0.100.51 kubectl apply -f /var/tmp/taxiapppod-deployment.yaml'
 
 							}catch(error)
-							{							
+							{
 
 							}
 					}
 				}
 			}
 		}
-	}
-
-	post {
-		always {
-			sh 'docker logout'
-		}
-	}
-
+}
+post {
+        always {
+            sh 'docker logout'
+        }
+    }
 }
