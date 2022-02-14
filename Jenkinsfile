@@ -28,7 +28,7 @@ pipeline {
         stage('Create POD on K8s')
 		{
 			steps{
-				sshagent(['k8s'])
+				sshagent(['k8s-login'])
 				{
 					sh 'scp -r -o StrictHostKeyChecking=no taxiapppod-deployment.yaml root@10.0.100.51:/var/tmp/'
 					
